@@ -7,6 +7,7 @@ use an ultrasonic distance sensor (I used this one: [SainSmart HC-SR04 Ranging D
 
 ## references
 - [original Instructable](https://www.instructables.com/Raspberry-Pi-Park-Sensor/)
+- additional inspiration @ [github.com/matthewf01/pi-parking-sensor](https://github.com/matthewf01/pi-parking-sensor)
 
 ## helper commands
 
