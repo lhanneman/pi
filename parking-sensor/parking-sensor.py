@@ -11,90 +11,95 @@ GREEN=17
 YELLOW=27
 RED=22
 
+# distance variables
+MAX_DISTANCE=200 # light off over 100 cm out
+KEEP_GOING=70 # show green when we're within 200cm
+GETTING_CLOSE=50 # show yellow as we approach the final parking spot
+
 GPIO.setup(TRIG,GPIO.OUT)
 GPIO.setup(ECHO,GPIO.IN)
 GPIO.setup(GREEN,GPIO.OUT)
 GPIO.setup(YELLOW,GPIO.OUT)
 GPIO.setup(RED,GPIO.OUT)
 
-def lightsoff():
+def off():
 	GPIO.output(RED,GPIO.LOW)
 	GPIO.output(YELLOW,GPIO.LOW)
 	GPIO.output(GREEN,GPIO.LOW)
 
-def green_light():
-	print("Green")
+def green():
 	GPIO.output(GREEN,GPIO.HIGH)
 	GPIO.output(YELLOW,GPIO.LOW)
 	GPIO.output(RED,GPIO.LOW)
 
-def yellow_light():
-	print("yellow")
+def yellow():
 	GPIO.output(GREEN,GPIO.LOW)
 	GPIO.output(YELLOW,GPIO.HIGH)
 	GPIO.output(RED,GPIO.LOW)
 
-def red_light():
-	print("red")
+def red():
 	GPIO.output(GREEN,GPIO.LOW)
 	GPIO.output(YELLOW,GPIO.LOW)
 	GPIO.output(RED,GPIO.HIGH)
 
 def get_distance():
-	GPIO.output(TRIG,True)
+	GPIO.output(TRIG, True)
 	time.sleep(0.00001)
-	GPIO.output(TRIG,False)
+	GPIO.output(TRIG, False)
 	start = time.time()
-	while GPIO.input(ECHO)==0:
+	while GPIO.input(ECHO) == 0:
 		start = time.time()
-	while GPIO.input(ECHO)==1:
+	while GPIO.input(ECHO) == 1:
 		end = time.time()
-	elapsed = end-start
-	distance = (elapsed * 34300)/2
+	elapsed = end - start
+	distance = (elapsed * 34300) / 2
 	return distance
 
-def calculate_average():
-  # This function takes 3 measurements and returns the average.
-  distance1=get_distance()
-  time.sleep(0.1)
-  distance2=get_distance()
-  time.sleep(0.1)
-  distance3=get_distance()
-  distance = distance1 + distance2 + distance3
-  distance = distance / 3
-  return distance
+# def calculate_average():
+#   # This function takes 3 measurements and returns the average.
+#   distance1=get_distance()
+#   time.sleep(0.1)
+#   distance2=get_distance()
+#   time.sleep(0.1)
+#   distance3=get_distance()
+#   distance = distance1 + distance2 + distance3
+#   distance = distance / 3
+#   return distance
 
-
-GPIO.output(TRIG,False)
+def test():
+	green()
+	time.sleep(0.5)
+	yellow()
+	time.sleep(0.5)
+	red()
+	time.sleep(0.5)
+	off()
+	
 
 # light test
-print("beginning light test")
-GPIO.output(GREEN,GPIO.HIGH)
-time.sleep(0.5)
-GPIO.output(YELLOW,GPIO.HIGH)
-time.sleep(0.5)
-GPIO.output(RED,GPIO.HIGH)
-time.sleep(0.5)
-lightsoff()
+test()
+GPIO.output(TRIG,False)
+
+time.sleep(5)
 
 try:
 	while True:
-		distance = calculate_average()
+		distance = get_distance()
 		time.sleep(0.05)
-		print(distance)
-		if distance >= 100:
-			lightsoff()
-		elif distance >= 50:
-			green_light()
-		elif distance > 30:
-			yellow_light()
+		
+		if distance > MAX_DISTANCE:
+			off()
+		elif distance > KEEP_GOING:
+			green()
+		elif distance > GETTING_CLOSE:
+			yellow()
 		else:
-			red_light()
-		time.sleep(0.5)
+			red()
+		time.sleep(2)
 
 
 except KeyboardInterrupt:
 	# User pressed CTRL-C
 	# Reset GPIO settings
-	lightsoff()
+	off()
 	GPIO.cleanup()
